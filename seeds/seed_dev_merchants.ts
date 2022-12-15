@@ -10,4 +10,7 @@ export async function seed(knex: Knex): Promise<void> {
         { id: 4, name: "merch-4", phone: "+62812345", lat: 10.5, lon: 10.7 },
         { id: 5, name: "merch-5", phone: "+62812345", lat: 10.5, lon: 10.7 },
     ]);
+
+    // reset sequences for postgresql
+    await knex.raw("select setval('merchants_id_seq', (select max(merchants.id) from merchants));")
 };

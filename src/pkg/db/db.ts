@@ -1,37 +1,24 @@
 import { Knex, knex } from "knex";
+import config from "../config";
 import log from "../log";
 
-export const config = {
-  client: "postgresql",
-  connection: {
-    host: "host.docker.internal",
-    port: 4101,
-    database: "bipi-db",
-    user: "bipi",
-    password: "bipidb",
-  },
-  pool: {
-    min: 2,
-    max: 10,
-  },
-  migrations: {
-    tableName: "knex_migrations",
-  },
-};
-
 const InitDB = async () => {
-  const instance: Knex = knex(config as Knex.Config);
+  const instance: Knex = knex(config.get().knex);
+
+  // log raw database query on development
+  if (config.IsDevENV()) {
+    instance.on("query", function (query) {
+      log.info(
+        "knex query:",
+        query["sql"],
+        "args:",
+        JSON.stringify(query["bindings"])
+      );
+    });
+  }
 
   await instance.raw("select 1");
   log.info(`Connected to database - OK`);
-
-  // .then(() => {
-  //   console.log(`Connected to database - OK`);
-  // })
-  // .catch((err) => {
-  //   console.error(`Failed to connect to database: ${err}`);
-  //   process.exit(1);
-  // });
 
   return instance;
 };

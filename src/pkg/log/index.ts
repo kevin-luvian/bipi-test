@@ -1,8 +1,8 @@
 import { createLogger, transports, format, Logger } from "winston";
 
-function traceLine() {
+function traceLine(skip: number = 0) {
   const e: any = new Error();
-  const frame: string = e.stack.split("\n")[3];
+  const frame: string = e.stack.split("\n")[3 + skip];
   const lineNumber = frame.split(":").reverse()[1];
 
   let functionName = frame.split(" ").at(-1) ?? "";
@@ -30,7 +30,13 @@ namespace log {
           format: "YYYY-MM-DD HH:mm:ss",
         }),
         format.printf(({ timestamp, level, message, line, args }) => {
-          return `[${level} ${timestamp} ${line}] ${message} ${args.join(" ")}`;
+          message = [message, ...args]
+            .map((m) => {
+              if (typeof m == "string") return m;
+              return JSON.stringify(m, null, 2);
+            })
+            .join(" ");
+          return `[${level} ${timestamp} ${line}] ${message}`;
         })
       ),
     });

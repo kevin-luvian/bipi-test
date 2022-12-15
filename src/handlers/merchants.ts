@@ -1,17 +1,17 @@
-import { Router, Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
+import MerchantUseCase from "../usecases/merchants";
 
 export class Merchant {
-  public path: string = "";
+  private merchantUC: MerchantUseCase;
 
-  constructor(path: string) {
-    this.path = path;
+  constructor(merchantUC: MerchantUseCase) {
+    this.merchantUC = merchantUC;
   }
 
-  public GetMerchants = async (request: Request, response: Response) => {
-    const id = request.params.id;
-    const userQuery = "UQ";
-    response.json({ id, userQuery, path: this.path });
+  public GetMerchants = async (req: Request, res: Response) => {
+    const data = await this.merchantUC.GetAll();
+    res.json({ merchants: data });
   };
 }
 
-export default Merchant
+export default Merchant;

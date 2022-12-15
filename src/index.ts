@@ -1,9 +1,8 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express } from "express";
 import { graphqlHTTP } from "express-graphql";
-import { buildSchema } from "graphql";
-import config from "./config";
-import InitGQL from "./graphql/schema";
-import Handlers, { Dependencies } from "./handlers";
+import config from "./pkg/config";
+import InitGQL from "./graphql";
+import Handlers from "./handlers";
 import InitDB from "./pkg/db/db";
 import log from "./pkg/log";
 import MerchantRepository from "./repositories/merchants";
@@ -11,27 +10,15 @@ import applyRoutes from "./routes";
 import MerchantUseCase from "./usecases/merchants";
 import path from "path";
 
-// Construct a schema, using GraphQL schema language
-// var schema = buildSchema(`
-//   type Query {
-//     hello: String
-//   }
-// `);
-
-// The root provides a resolver function for each API endpoint
-// var root = {
-//   hello: () => {
-//     return "Hello world!";
-//   },
-// };
-
 const init = () => {
   try {
+    const rootPath = path.resolve(__dirname, "../../conf/config.ini");
+
     log.init();
-    config.init();
-    config.setRootDir(path.resolve(__dirname));
+    config.init(rootPath);
   } catch (err) {
-    console.error("cant initialize app, err:", err);
+    console.error("failed to initialize, err:", err);
+    process.exit(1);
   }
 };
 
@@ -40,30 +27,27 @@ const main = async () => {
     const app: Express = express();
     const port = "3000";
 
-    const gqlSchema = await InitGQL();
     const db = await InitDB();
 
     const mRepo = new MerchantRepository({ db: db });
 
-    const mUC = new MerchantUseCase({});
+    const mUC = new MerchantUseCase({ merchantRepo: mRepo });
 
-    const h = new Handlers({
-      globalPath: "abc",
-      merchantUC: mUC,
-    });
+    const gql = await InitGQL({ merchantUC: mUC });
+
+    const h = new Handlers({ merchantUC: mUC });
 
     app.use(
       "/graphql",
       graphqlHTTP({
-        schema: gqlSchema,
-        // rootValue: root,
+        schema: gql,
         graphiql: true,
       })
     );
 
     applyRoutes(app, h);
 
-    const srv = app.listen(port, () => {
+    app.listen(port, () => {
       log.info(`⚡️[server]: Server is running at http://localhost:${port}`);
     });
 

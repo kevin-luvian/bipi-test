@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
     ports:
       - 4100:3000
-    command: yarn dev
+    command: yarn start
   pg:
     container_name: bipi_pg
     image: postgres:10.12-alpine

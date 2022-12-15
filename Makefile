@@ -3,6 +3,7 @@ export NOW=$(shell date +"%Y/%m/%d")
 configure:
 	@echo "${NOW} === CONFIGURING ENV ==="
 	@yarn install
+	@yarn build
 	@echo "${NOW} === DONE ==="
 
 migrate:
@@ -23,7 +24,7 @@ rollback:
 .PHONY: dev
 dev:
 	@echo "${NOW} === RUNNING DEVELOPMENT ENV ==="
-	@yarn install
+	@make configure
 	@docker-compose up -d
 	@echo "click this link to open the backend http://localhost:4100"
 	@echo "${NOW} === DONE ==="

@@ -5,17 +5,21 @@ import bodyParser from "body-parser";
 const applyRoutes = (app: Express, h: Handler) => {
   app.use(bodyParser.json());
 
-  // all
-  app.get("/", (req: Request, res: Response) => {
-    res.send("Express + TypeScript Server 2sasdasd");
-  });
+  const root = Router();
 
-  //
+  // merchants endpoints
   const mr = Router();
   {
     mr.get("/", h.Merchant.GetMerchants);
-    app.use("/merchants", mr);
+    root.use("/merchants", mr);
   }
+
+  // root endpoints
+  root.get("/", (req: Request, res: Response) => {
+    res.send("Backend Express Server");
+  });
+
+  app.use("/api", root);
 };
 
 export default applyRoutes;
