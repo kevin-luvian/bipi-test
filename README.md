@@ -5,6 +5,9 @@ part of bipi technical test
 ### base api
 https://bipi-test.atkev.site/api
 
+### get merchants
+https://bipi-test.atkev.site/api/merchants
+
 ### base graphql
 https://bipi-test.atkev.site/graphql
 
